@@ -1,0 +1,90 @@
+#define EA 3        //모터 드라이버 EA핀, 아두이노 디지털 3번 핀에 연결
+#define EB 11       // 모터드라이버 EB핀, 아두이노 디지털 11번 핀에 연결
+#define M_IN1 4     // 모터 드라이버 IN1핀, 아두이노 디지털 4번핀에 연결
+#define M_IN2 5     // 모터 드라이버 IN2핀, 아두이노 디지털 5번핀에 연결
+#define M_IN3 13    //모터 드라이버 IN3번 핀, 아두이노 디지털 13번 핀에 연결
+#define M_IN4 12    //모터 드라이버 IN4번 핀, 아두이노 디지털 12번 핀에 연결
+#define R_Sensor 8  //오른쪽 트랙킹 (추적) 센서 모듈 D0핀, 아두이노 우노 R3의 8번 핀에 연결
+#define C_Sensor 9  //가운데 트랙킹(추적) 센서 모듈 D0핀, 아두이노 우노 R3의 9번 핀에 연결
+#define L_Sensor 10 //왼쪽 트랙킹  (추적)센서 모듈 D0핀, 아두이노 우노 R3의 10번 핀에 연결
+
+int motorA_vector = 1; //모터의 회전방향이 반대일 시 0을 1로, 1을 0으로 바꿔주면 모터의 회전방향이 바뀜
+
+int motorB_vector = 1; //모터의 회전방향이 반대일 시 0을 1로, 1을 0으로 바꿔주면 모터의 회전방향이 바뀜
+
+int motor_speed = 255; //모터 스피드 0~255
+
+
+void setup() //초기화
+{
+  pinMode(EA, OUTPUT);  //EA 핀 출력 설정
+  pinMode(EB, OUTPUT);  //EB 핀 출력 설정
+  pinMode(M_IN1, OUTPUT);  // IN1 핀 출력 설정
+  pinMode(M_IN2, OUTPUT);  // IN2 핀 출력 설정
+  pinMode(M_IN3, OUTPUT);  // IN3 핀 출력 설정
+  pinMode(M_IN4, OUTPUT);  // IN4 핀 출력 설정
+  pinMode(R_Sensor, INPUT);   // 오른쪽 센서 D0핀 입력 설정
+  pinMode(C_Sensor, INPUT);   // 가운데 센서 D0핀 입력 설정
+  pinMode(L_Sensor, INPUT);   // 왼쪽 센서 D0핀 입력 설정
+  delay(3000);  //갑작스러운 움직임을 막기 위한 3초간 지연
+}
+
+void loop()//무한 루프
+{
+  if(digitalRead(L_Sensor)) // 만약 왼쪽 센서가 감지되면
+  {
+    motorA_con(motor_speed);    // 모터A 정방향
+    motorB_con(-(motor_speed)); // 모터B 역방향
+  }
+  else if(digitalRead(R_Sensor)) //만약 오른쪽 센서가 감지되면
+  {
+    motorA_con(-(motor_speed)); // 모터A 역방향
+    motorB_con(motor_speed);    // 모터B 정방향
+  }
+    else if(digitalRead(C_Sensor))// 만약 가운데 센서가 감지되면
+  {
+    motorA_con(motor_speed);   // 모터 A정방향
+    motorB_con(motor_speed);// 모터 B정방향
+  }
+}
+
+void motorA_con(int M1) //모터 A 컨트롤 함수
+{
+  if(M1 > 0)// M1이 양수일 때, 모터 A 정회전
+  {
+    digitalWrite(M_IN1, motorA_vector); // IN1번이 HIGH(motorA_vector가 0이면 LOW)
+    digitalWrite(M_IN2, !motorA_vector); // IN2번이 LOW(motorA_vector가 0이면 HIGH)
+  }
+  else if(M1 < 0)//M1이 음수일 때, 모터 A 역회전
+  {
+   digitalWrite(M_IN1, !motorA_vector);// IN1번이 LOW(motorA_vector가 0이면 HIGH)
+   digitalWrite(M_IN2, motorA_vector); // IN2번이 HIGH(motorA_vector가 0이면 LOW)
+  }
+  else //모터A 정지
+  {
+    digitalWrite(M_IN1, LOW); // IN1번이 LOW
+    digitalWrite(M_IN2, LOW); //IN2번이 LOW
+  }
+  analogWrite(EA, abs(M1)); //M1의 절대값으로 모터 A속도 제어
+}
+
+
+void motorB_con(int M2)//모터 B 컨트롤 함수
+{
+  if(M2 > 0) //M2가 양수일 때, 모터B 정회전
+  {
+    digitalWrite(M_IN3, motorB_vector); //IN3번이 HIGH(motorB_vector가 0이면 LOW)
+    digitalWrite(M_IN4, !motorB_vector); //IN4번이 LOW(motorB_vector가 0이면 HIGH)
+  }
+  else if(M2 < 0) //M2가 양수일 때, 모터 B 정회전
+  {
+   digitalWrite(M_IN3, !motorB_vector); //IN3번이 LOW(motorA_vector가 0이면 HIGH)
+   digitalWrite(M_IN4, motorB_vector);  //IN4번이 HIGH(motorA_vector가 0이면 LOW)
+  }
+  else //모터 B정지
+  {
+    digitalWrite(M_IN3, LOW); //IN4번에 LOW
+    digitalWrite(M_IN4, LOW); //IN3번에 LOW
+  }
+  analogWrite(EB, abs(M2));  //M2의 절대값으로 모터 B속도 제어
+  }
